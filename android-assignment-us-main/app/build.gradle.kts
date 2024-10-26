@@ -15,7 +15,7 @@ android {
         versionName = "1.0"
 
         buildConfigField("String", "NASA_BASE_URL", "\"https://api.nasa.gov\"")
-        buildConfigField("String", "API_KEY", "\"<YOUR_API_KEY_GOES_HERE>\"")
+        buildConfigField("String", "API_KEY", "\"nUcRRikJNdpwkBaJXL77phcDezm7TwzepJkTZK2X\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
