@@ -14,14 +14,17 @@ class PlanetsRepository(
         try {
             val response = planetaryService.getPictures()
             if (response.isSuccessful) {
+                println("getImagePlanets Success ${response.body()}")
                 //todo find out exact name of video media type
                 val planets =  response.body()?.filter { it.mediaType  != "Video"}
                 val mappedPlanets = PlanetMapper.mapAstronomyPicturesToPlanetModels(planets)
                 return mappedPlanets
             } else {
+                println("getImagePlanets Error loading planets")
                 return emptyList()
             }
         } catch (e : Exception) {
+            println("getImagePlanets exception --> ${e.message}")
             return emptyList()
         }
     }
