@@ -55,6 +55,8 @@ android {
 
 dependencies {
 
+    testImplementation(libs.mockito.kotlin)
+
     implementation(libs.koin.android)
 
     implementation(libs.androidx.core.ktx)
