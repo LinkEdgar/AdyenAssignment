@@ -1,5 +1,7 @@
 package com.adyen.android.assignment.ui.planets
 
+import java.time.LocalDate
+
 /**
  * Model for planets of the image type.
  * If needed in the future we can make a video planet model as well. This assumes their
@@ -9,7 +11,7 @@ package com.adyen.android.assignment.ui.planets
 data class PlanetImageModel(
     val title: String,
     val explanation: String,
-    val date: String,
+    val date: LocalDate,
     val imageUrlHQ: String?,
     val imageUrl: String
 )

@@ -18,6 +18,7 @@ class PlanetsRepository(
                 //todo find out exact name of video media type
                 val planets =  response.body()?.filter { it.mediaType  != "Video"}
                 val mappedPlanets = PlanetMapper.mapAstronomyPicturesToPlanetModels(planets)
+                println("mapped planets --> $mappedPlanets")
                 return mappedPlanets
             } else {
                 println("getImagePlanets Error loading planets")
