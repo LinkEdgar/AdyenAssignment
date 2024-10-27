@@ -55,6 +55,12 @@ android {
 
 dependencies {
 
+
+    implementation(libs.androidx.navigation.compose)
+
+    implementation(libs.glide)
+
+
     testImplementation(libs.mockito.kotlin)
 
     implementation(libs.koin.android)
