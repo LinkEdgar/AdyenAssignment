@@ -1,5 +1,6 @@
 package com.adyen.android.assignment.ui.planets
 
+import com.adyen.android.assignment.util.DateUtil.formatLocalDateToString
 import java.time.LocalDate
 
 /**
@@ -14,4 +15,8 @@ data class PODImageModel(
     val date: LocalDate,
     val imageUrlHQ: String?,
     val imageUrl: String
-)
+) {
+    fun getFormattedDate() : String {
+        return formatLocalDateToString(date)
+    }
+}

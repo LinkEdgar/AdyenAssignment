@@ -113,11 +113,11 @@ fun PODListSuccessScreen(
         Spacer(Modifier.height(32.dp))
 
         LazyColumn {
-            items(pods) {
+            items(pods) { pod ->
                 PODListContainer(
-                    it.title,
-                    it.date.toString(),
-                    it.imageUrl,
+                    pod.title,
+                    pod.getFormattedDate(),
+                    pod.imageUrl,
                     onPODClicked
                 )
             }

@@ -51,8 +51,7 @@ class PODViewModel(
             }
 
             FilterType.DATE -> {
-                //todo fix date
-                planets.sortedByDescending { planet -> planet.title }
+                planets.sortedByDescending { planet -> planet.date }
             }
         }
     }

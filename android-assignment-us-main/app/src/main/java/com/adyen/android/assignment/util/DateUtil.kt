@@ -17,4 +17,14 @@ object DateUtil {
         }
     }
 
+    /**
+     * Formats dates to as a string mm/dd/yyyy
+     */
+    fun formatLocalDateToString(date: LocalDate): String {
+        val month = if (date.monthValue < 10) "0${date.monthValue}" else "${date.monthValue}"
+        val day = if (date.dayOfMonth < 10) "0${date.dayOfMonth}" else "${date.dayOfMonth}"
+        val year = date.year
+        return "$month/$day/$year"
+    }
+
 }

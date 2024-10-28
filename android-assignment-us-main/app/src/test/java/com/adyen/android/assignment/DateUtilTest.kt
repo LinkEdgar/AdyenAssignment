@@ -28,4 +28,44 @@ class DateUtilTest {
         val date = DateUtil.convertStringToDate(stringDate)
         assert(date == null)
     }
+
+    @Test
+    fun `Given a date with a day of ordinal value less than 10 we expect date string to be formatted as mm-dd-yyy`() {
+        val stringDate = "2021-01-07"
+        val date = DateUtil.convertStringToDate(stringDate)
+        assert(date != null)
+        val expectedDate = "01/07/2021"
+        val result = DateUtil.formatLocalDateToString(date!!)
+        assert(expectedDate == result)
+    }
+
+    @Test
+    fun `Given a date with a day of ordinal value greater than 10 we expect date string be formatted as mm-dd-yyy`() {
+        val stringDate = "2021-01-24"
+        val date = DateUtil.convertStringToDate(stringDate)
+        assert(date != null)
+        val expectedDate = "01/24/2021"
+        val result = DateUtil.formatLocalDateToString(date!!)
+        assert(expectedDate == result)
+    }
+
+    @Test
+    fun `Given a date with a month of ordinal value less than 10 we expect date string to be formatted as mm-dd-yyy`() {
+        val stringDate = "2022-06-03"
+        val date = DateUtil.convertStringToDate(stringDate)
+        assert(date != null)
+        val expectedDate = "06/03/2022"
+        val result = DateUtil.formatLocalDateToString(date!!)
+        assert(expectedDate == result)
+    }
+
+    @Test
+    fun `Given a date with a month of ordinal value greater than 10 we expect date string be formatted as mm-dd-yyy`() {
+        val stringDate = "2020-11-24"
+        val date = DateUtil.convertStringToDate(stringDate)
+        assert(date != null)
+        val expectedDate = "11/24/2020"
+        val result = DateUtil.formatLocalDateToString(date!!)
+        assert(expectedDate == result)
+    }
 }
