@@ -1,17 +1,17 @@
 package com.adyen.android.assignment
 
 import com.adyen.android.assignment.api.model.AstronomyPicture
-import com.adyen.android.assignment.ui.planets.PlanetImageModel
+import com.adyen.android.assignment.ui.planets.PODImageModel
 import com.adyen.android.assignment.util.DateUtil
 
-object PlanetMapper {
+object PODMapper {
 
     /**
-     * Maps [AstronomyPicture] to [PlanetImageModel]
+     * Maps [AstronomyPicture] to [PODImageModel]
      */
-    fun mapImageAstronomyPictureToPlanetsModel(astronomyPicture: AstronomyPicture): PlanetImageModel? {
+    fun mapImageAstronomyPictureToPlanetsModel(astronomyPicture: AstronomyPicture): PODImageModel? {
         if (astronomyPicture.mediaType != "image") return null // since we are only concerned about images at the moment
-        return PlanetImageModel(
+        return PODImageModel(
             title = astronomyPicture.title ?: return null, //since we want to order by title I decided not to models without it
             explanation = astronomyPicture.explanation ?: "",
             date = DateUtil.convertStringToDate(astronomyPicture.date ?: "") ?: return null, //since we want to order by date I decided not to models without it
@@ -21,10 +21,10 @@ object PlanetMapper {
     }
 
     /**
-     * Maps a list of [AstronomyPicture] to a list of [PlanetImageModel]
+     * Maps a list of [AstronomyPicture] to a list of [PODImageModel]
      * and returns an empty list if [astronomyPictures] is null
      */
-    fun mapAstronomyPicturesToPlanetModels(astronomyPictures: List<AstronomyPicture>?) : List<PlanetImageModel> {
+    fun mapAstronomyPicturesToPlanetModels(astronomyPictures: List<AstronomyPicture>?) : List<PODImageModel> {
         return astronomyPictures?.mapNotNull {
             mapImageAstronomyPictureToPlanetsModel(it)
         } ?: emptyList()

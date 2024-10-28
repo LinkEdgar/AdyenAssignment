@@ -8,7 +8,7 @@ import java.time.LocalDate
  * will be differences between the two types. Video planet model may have information
  * related to ratio and thumbnail urls
  */
-data class PlanetImageModel(
+data class PODImageModel(
     val title: String,
     val explanation: String,
     val date: LocalDate,

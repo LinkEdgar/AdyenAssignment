@@ -3,7 +3,7 @@ package com.adyen.android.assignment
 import com.adyen.android.assignment.api.model.AstronomyPicture
 import org.junit.Test
 
-class PlanetMapperTest {
+class PODMapperTest {
 
     @Test
     fun `Given a null date we expect mapAstronomyPictureToPlanetsModel to return null`() {
@@ -12,7 +12,7 @@ class PlanetMapperTest {
             date = null, hdUrl = "", url = "", mediaType = "Image"
             )
 
-        val mappedModel = PlanetMapper.mapImageAstronomyPictureToPlanetsModel(astronomyPicture)
+        val mappedModel = PODMapper.mapImageAstronomyPictureToPlanetsModel(astronomyPicture)
         assert(mappedModel == null)
     }
 
@@ -23,7 +23,7 @@ class PlanetMapperTest {
             date = "2014-07-12", hdUrl = "", url = "", mediaType = "Image"
         )
 
-        val mappedModel = PlanetMapper.mapImageAstronomyPictureToPlanetsModel(astronomyPicture)
+        val mappedModel = PODMapper.mapImageAstronomyPictureToPlanetsModel(astronomyPicture)
         assert(mappedModel == null)
     }
 
@@ -34,7 +34,7 @@ class PlanetMapperTest {
             date = "2014-07-12", hdUrl = "", url = "", mediaType = "Video"
         )
 
-        val mappedModel = PlanetMapper.mapImageAstronomyPictureToPlanetsModel(astronomyPicture)
+        val mappedModel = PODMapper.mapImageAstronomyPictureToPlanetsModel(astronomyPicture)
         assert(mappedModel == null)
     }
 
@@ -45,7 +45,7 @@ class PlanetMapperTest {
             date = "2014-07-12", hdUrl = "", url = "", mediaType = "image"
         )
 
-        val mappedModel = PlanetMapper.mapImageAstronomyPictureToPlanetsModel(astronomyPicture)
+        val mappedModel = PODMapper.mapImageAstronomyPictureToPlanetsModel(astronomyPicture)
         assert(mappedModel != null)
     }
 }

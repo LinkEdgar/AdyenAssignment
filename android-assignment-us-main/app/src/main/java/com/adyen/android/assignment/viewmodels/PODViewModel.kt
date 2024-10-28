@@ -3,7 +3,7 @@ package com.adyen.android.assignment.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.adyen.android.assignment.PlanetsRepository
-import com.adyen.android.assignment.ui.planets.PlanetImageModel
+import com.adyen.android.assignment.ui.planets.PODImageModel
 import com.adyen.android.assignment.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,14 +12,14 @@ import kotlinx.coroutines.launch
 /**
  * Using android viewmodel to help with configuration changes
  */
-class PlanetViewModel(
+class PODViewModel(
     private val planetsRepository: PlanetsRepository
 ): ViewModel() {
 
     //todo add tests
 
     private val filterType: FilterType = FilterType.TITLE
-    private val _uiState = MutableStateFlow<Resource<List<PlanetImageModel>>>(Resource.Uninitiated)
+    private val _uiState = MutableStateFlow<Resource<List<PODImageModel>>>(Resource.Uninitiated)
 
     val uiState = _uiState.asStateFlow()
 
@@ -44,7 +44,7 @@ class PlanetViewModel(
         _uiState.value = Resource.Success(sortedPlanets)
     }
 
-    fun getSortedPlanets(planets: List<PlanetImageModel>) : List<PlanetImageModel> {
+    fun getSortedPlanets(planets: List<PODImageModel>) : List<PODImageModel> {
         return when (filterType) {
             FilterType.TITLE -> {
                 planets.sortedBy { planet -> planet.title }

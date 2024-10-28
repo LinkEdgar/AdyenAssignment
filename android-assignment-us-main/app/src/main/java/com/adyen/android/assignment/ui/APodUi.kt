@@ -28,15 +28,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.adyen.android.assignment.R
 import com.adyen.android.assignment.util.Resource
-import com.adyen.android.assignment.viewmodels.PlanetViewModel
+import com.adyen.android.assignment.viewmodels.PODViewModel
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import androidx.navigation.toRoute
-import com.adyen.android.assignment.ui.planets.PlanetImageModel
+import com.adyen.android.assignment.ui.planets.PODImageModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 
@@ -55,13 +57,13 @@ fun ApodContainer() {
 
 @Composable
 fun PODListScreen(
-    planetViewModel: PlanetViewModel = koinViewModel(),
-    onPlanetClicked: (podTitle: String) -> Unit
+    PODViewModel: PODViewModel = koinViewModel(),
+    onPODClicked: (podTitle: String) -> Unit
 ) {
 
-    val uiState = planetViewModel.uiState.collectAsStateWithLifecycle()
+    val uiState = PODViewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
-        planetViewModel.loadPlanets()
+        PODViewModel.loadPlanets()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -78,40 +80,49 @@ fun PODListScreen(
                 )
             }
             is Resource.Success -> {
-                val podList: List<PlanetImageModel> = (uiState.value as? Resource.Success<List<PlanetImageModel>>)?.data ?: emptyList()
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-
-                    Spacer(Modifier.height(32.dp))
-
-                    Text(
-                        "Our Universe",
-                        color = Color.White,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(Modifier.height(32.dp))
-
-                    LazyColumn {
-                        items(podList) {
-                            PODListContainer(
-                                it.title,
-                                it.date.toString(),
-                                it.imageUrl,
-                                onPlanetClicked
-                            )
-                        }
-                    }
-
-                }
+                val podList: List<PODImageModel> = (uiState.value as? Resource.Success<List<PODImageModel>>)?.data ?: emptyList()
+                PODListSuccessScreen(pods = podList, onPODClicked = onPODClicked)
 
             }
             Resource.Uninitiated -> {
 
             }
         }
+    }
+}
+
+@Composable
+fun PODListSuccessScreen(
+    pods: List<PODImageModel>,
+    onPODClicked: (podTitle: String) -> Unit
+) {
+    Column(
+        modifier = Modifier.padding(16.dp)
+    ) {
+
+        Spacer(Modifier.height(32.dp))
+
+        Text(
+            "Our Universe",
+            color = Color.White,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            fontSize = 24.sp
+        )
+
+        Spacer(Modifier.height(32.dp))
+
+        LazyColumn {
+            items(pods) {
+                PODListContainer(
+                    it.title,
+                    it.date.toString(),
+                    it.imageUrl,
+                    onPODClicked
+                )
+            }
+        }
+
     }
 }
 
@@ -137,7 +148,8 @@ fun PODListContainer(
                 .size(50.dp)
                 .clip(CircleShape),
             contentDescription = "",
-            model = url
+            model = url,
+            contentScale = ContentScale.Crop
         )
 
         Spacer(Modifier.width(16.dp))
@@ -171,7 +183,7 @@ fun PlanetsApp() {
     NavHost(navController = navController, startDestination =  PODS) {
         composable<PODS> {
             PODListScreen(
-                onPlanetClicked = { podTitle ->  navController.navigate(route = PODDetails(title = podTitle)) }
+                onPODClicked = { podTitle ->  navController.navigate(route = PODDetails(title = podTitle)) }
             )
         }
         composable<PODDetails> { navBackStackEntry ->
