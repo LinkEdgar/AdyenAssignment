@@ -54,3 +54,7 @@ Include your Git repository (with history intact) in the final zip file.
 Please provide a summary of your decision-making process while working on this assignment:
 
 [Your prioritization summary here]
+I prioritized testing of all business related objects such as mappers, viewmodels, and utility. Some ui components were 
+not able to be build due to time constraints. One such case is the error and no network UI. My DI choice was koin but dagger or hilt would
+work fine as well. Good separation of concern from the UI layer is another prioritization I made. Choosing to use a mapper to map response objects to 
+UI models also allows for an easier use of models at the UI level. Given more time a local DB such as room could allow us to show older content to users while we update and fetch more.

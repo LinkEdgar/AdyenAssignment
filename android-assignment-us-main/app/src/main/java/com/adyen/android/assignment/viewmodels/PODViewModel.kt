@@ -24,16 +24,18 @@ open class PODViewModel(
     val uiState = _uiState.asStateFlow()
 
     fun loadPlanets() {
-        _uiState.value = Resource.Loading
-        viewModelScope.launch(dispatcher) {
+        if (_uiState.value !is Resource.Success) { //this will prevent us from reloading image after every configuraton state. Ideally we can use a datastore to update every 24 hours
+            _uiState.value = Resource.Loading
+            viewModelScope.launch(dispatcher) {
 
-            val response = podsRepository.getImagePlanets()
-            if (response is Resource.Success) {
-                val planets = response.data
-                val sortedPlanets = getSortedPODS(planets)
-                _uiState.value = Resource.Success(sortedPlanets)
-            } else {
-                _uiState.value = Resource.Error((response as Resource.Error).error)
+                val response = podsRepository.getImagePlanets()
+                if (response is Resource.Success) {
+                    val planets = response.data
+                    val sortedPlanets = getSortedPODS(planets)
+                    _uiState.value = Resource.Success(sortedPlanets)
+                } else {
+                    _uiState.value = Resource.Error((response as Resource.Error).error)
+                }
             }
         }
     }
