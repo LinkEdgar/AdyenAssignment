@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.adyen.android.assignment.PODsRepository
 import com.adyen.android.assignment.ui.planets.PODImageModel
 import com.adyen.android.assignment.util.Resource
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -12,11 +13,10 @@ import kotlinx.coroutines.launch
 /**
  * Using android viewmodel to help with configuration changes
  */
-class PODViewModel(
-    private val planetsRepository: PODsRepository
+open class PODViewModel(
+    private val podsRepository: PODsRepository,
+    private val dispatcher: CoroutineDispatcher
 ): ViewModel() {
-
-    //todo add tests
 
     private var filterType: FilterType = FilterType.TITLE
     private val _uiState = MutableStateFlow<Resource<List<PODImageModel>>>(Resource.Uninitiated)
@@ -25,12 +25,12 @@ class PODViewModel(
 
     fun loadPlanets() {
         _uiState.value = Resource.Loading
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
 
-            val response = planetsRepository.getImagePlanets()
+            val response = podsRepository.getImagePlanets()
             if (response is Resource.Success) {
                 val planets = response.data
-                val sortedPlanets = getSortedPlanets(planets)
+                val sortedPlanets = getSortedPODS(planets)
                 _uiState.value = Resource.Success(sortedPlanets)
             } else {
                 _uiState.value = Resource.Error((response as Resource.Error).error)
@@ -41,11 +41,11 @@ class PODViewModel(
     fun setFilterType(filterType: FilterType) {
         this.filterType = filterType
         val planets = (_uiState.value as? Resource.Success)?.data ?: emptyList()
-        val sortedPlanets = getSortedPlanets(planets)
+        val sortedPlanets = getSortedPODS(planets)
         _uiState.value = Resource.Success(sortedPlanets)
     }
 
-    fun getSortedPlanets(planets: List<PODImageModel>) : List<PODImageModel> {
+    private fun getSortedPODS(planets: List<PODImageModel>) : List<PODImageModel> {
         return when (filterType) {
             FilterType.TITLE -> {
                 planets.sortedBy { planet -> planet.title }

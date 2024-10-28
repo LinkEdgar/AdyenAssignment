@@ -203,6 +203,7 @@ fun PlanetDetailsScreen(
 
 }
 
+//todo determine whether we should dismiss dialog after action
 @Composable
 fun PODSortDialogScreen(
     onSortTypeSelected: (type: FilterType) -> Unit

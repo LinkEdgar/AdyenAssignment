@@ -4,13 +4,14 @@ import com.adyen.android.assignment.api.PlanetaryService
 import com.adyen.android.assignment.ui.planets.PODImageModel
 import com.adyen.android.assignment.util.Resource
 
-class PODsRepository(
+open class PODsRepository(
     private val planetaryService: PlanetaryService
 ) {
 
     /**
      * One consideration to make is adding a cache time to refresh
      * this API once a day if we wish to conserve user bandwidth
+     * This can be accomplished with Shared preferences or local DB
      */
 
     /**
@@ -18,7 +19,7 @@ class PODsRepository(
      * Returns a [Resource] wrapped list of [PODImageModel] if successful
      * otherwise an error message
      */
-    suspend fun getImagePlanets(): Resource<List<PODImageModel>> {
+    open suspend fun getImagePlanets(): Resource<List<PODImageModel>> {
         try {
             val response = planetaryService.getPictures()
             if (response.isSuccessful) {
