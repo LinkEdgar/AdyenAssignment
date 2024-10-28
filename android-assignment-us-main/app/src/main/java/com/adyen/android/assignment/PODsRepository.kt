@@ -4,7 +4,7 @@ import com.adyen.android.assignment.api.PlanetaryService
 import com.adyen.android.assignment.ui.planets.PODImageModel
 import com.adyen.android.assignment.util.Resource
 
-class PlanetsRepository(
+class PODsRepository(
     private val planetaryService: PlanetaryService
 ) {
     /**

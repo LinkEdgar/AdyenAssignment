@@ -13,7 +13,7 @@ import retrofit2.Response
 
 class PlanetRepositoryTest {
 
-    private lateinit var planetsRepository: PlanetsRepository
+    private lateinit var planetsRepository: PODsRepository
 
     @Mock
     private lateinit var planetaryService : PlanetaryService
@@ -21,7 +21,7 @@ class PlanetRepositoryTest {
     @Before
     fun setup() {
         planetaryService = mock()
-        planetsRepository = PlanetsRepository(planetaryService)
+        planetsRepository = PODsRepository(planetaryService)
     }
 
     @Test

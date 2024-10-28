@@ -2,7 +2,7 @@ package com.adyen.android.assignment.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.adyen.android.assignment.PlanetsRepository
+import com.adyen.android.assignment.PODsRepository
 import com.adyen.android.assignment.ui.planets.PODImageModel
 import com.adyen.android.assignment.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
  * Using android viewmodel to help with configuration changes
  */
 class PODViewModel(
-    private val planetsRepository: PlanetsRepository
+    private val planetsRepository: PODsRepository
 ): ViewModel() {
 
     //todo add tests
