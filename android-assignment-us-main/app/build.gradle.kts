@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    kotlin("plugin.serialization") version "1.9.23"
+
 }
 
 android {
@@ -55,6 +57,9 @@ android {
 
 dependencies {
 
+    implementation(libs.compose)
+
+    implementation(libs.koin.androidx.compose)
 
     implementation(libs.androidx.navigation.compose)
 
@@ -64,6 +69,8 @@ dependencies {
     testImplementation(libs.mockito.kotlin)
 
     implementation(libs.koin.android)
+    implementation(libs.kotlinx.serialization.json)
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

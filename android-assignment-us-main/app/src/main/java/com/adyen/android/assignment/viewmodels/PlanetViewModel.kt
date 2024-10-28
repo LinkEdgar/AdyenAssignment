@@ -51,7 +51,8 @@ class PlanetViewModel(
             }
 
             FilterType.DATE -> {
-                planets.sortedByDescending { planet -> planet.date }
+                //todo fix date
+                planets.sortedByDescending { planet -> planet.title }
             }
         }
     }

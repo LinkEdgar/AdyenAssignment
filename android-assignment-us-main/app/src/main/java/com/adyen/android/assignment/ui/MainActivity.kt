@@ -1,19 +1,19 @@
 package com.adyen.android.assignment.ui
 
+import android.os.Bundle
 import androidx.activity.ComponentActivity
-import com.adyen.android.assignment.PlanetsRepository
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
+import androidx.activity.compose.setContent
+import androidx.compose.material3.MaterialTheme
 
 class MainActivity : ComponentActivity() {
-    private val planetsRepository: PlanetsRepository by inject<PlanetsRepository>()
 
-    override fun onStart() {
-        //todo remove this test code
-        super.onStart()
-        GlobalScope.launch {
-            planetsRepository.getImagePlanets()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            MaterialTheme {
+                PlanetsApp()
+            }
         }
     }
 }
