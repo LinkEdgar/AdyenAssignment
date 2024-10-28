@@ -7,6 +7,12 @@ import com.adyen.android.assignment.util.Resource
 class PODsRepository(
     private val planetaryService: PlanetaryService
 ) {
+
+    /**
+     * One consideration to make is adding a cache time to refresh
+     * this API once a day if we wish to conserve user bandwidth
+     */
+
     /**
      * Get planets and filters out by media type for images
      * Returns a [Resource] wrapped list of [PODImageModel] if successful

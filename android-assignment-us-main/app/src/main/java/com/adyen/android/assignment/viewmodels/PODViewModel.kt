@@ -18,7 +18,7 @@ class PODViewModel(
 
     //todo add tests
 
-    private val filterType: FilterType = FilterType.TITLE
+    private var filterType: FilterType = FilterType.TITLE
     private val _uiState = MutableStateFlow<Resource<List<PODImageModel>>>(Resource.Uninitiated)
 
     val uiState = _uiState.asStateFlow()
@@ -39,6 +39,7 @@ class PODViewModel(
     }
 
     fun setFilterType(filterType: FilterType) {
+        this.filterType = filterType
         val planets = (_uiState.value as? Resource.Success)?.data ?: emptyList()
         val sortedPlanets = getSortedPlanets(planets)
         _uiState.value = Resource.Success(sortedPlanets)

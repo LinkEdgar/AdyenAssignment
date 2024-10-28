@@ -1,7 +1,9 @@
 package com.adyen.android.assignment.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,52 +15,50 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.adyen.android.assignment.R
-import com.adyen.android.assignment.util.Resource
-import com.adyen.android.assignment.viewmodels.PODViewModel
-import org.koin.androidx.compose.koinViewModel
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.adyen.android.assignment.R
 import com.adyen.android.assignment.ui.planets.PODImageModel
+import com.adyen.android.assignment.util.Resource
+import com.adyen.android.assignment.viewmodels.FilterType
+import com.adyen.android.assignment.viewmodels.PODViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import kotlinx.serialization.Serializable
+import org.koin.androidx.compose.koinViewModel
 
-@Composable
-fun ApodContainer() {
-
-    Column {
-        Image(painter = painterResource(R.drawable.ic_stars), contentDescription = "")
-
-        Text(text = "Test")
-
-        Text(text = "Test Description")
-    }
-
-}
 
 @Composable
 fun PODListScreen(
-    PODViewModel: PODViewModel = koinViewModel(),
-    onPODClicked: (podTitle: String) -> Unit
+    PODViewModel: PODViewModel,
+    onPODClicked: (podTitle: String) -> Unit,
+    onSortClicked: () -> Unit
 ) {
 
     val uiState = PODViewModel.uiState.collectAsStateWithLifecycle()
@@ -68,10 +68,11 @@ fun PODListScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        when(uiState.value) {
+        when (uiState.value) {
             is Resource.Error -> {
                 Text("error")
             }
+
             Resource.Loading -> {
                 CircularProgressIndicator(
                     modifier = Modifier
@@ -79,11 +80,17 @@ fun PODListScreen(
                         .size(50.dp)
                 )
             }
+
             is Resource.Success -> {
-                val podList: List<PODImageModel> = (uiState.value as? Resource.Success<List<PODImageModel>>)?.data ?: emptyList()
-                PODListSuccessScreen(pods = podList, onPODClicked = onPODClicked)
+                val podList: List<PODImageModel> =
+                    (uiState.value as? Resource.Success<List<PODImageModel>>)?.data ?: emptyList()
+                PODListSuccessScreen(
+                    pods = podList,
+                    onPODClicked = onPODClicked,
+                    onSortClicked = { onSortClicked() })
 
             }
+
             Resource.Uninitiated -> {
 
             }
@@ -94,35 +101,60 @@ fun PODListScreen(
 @Composable
 fun PODListSuccessScreen(
     pods: List<PODImageModel>,
-    onPODClicked: (podTitle: String) -> Unit
+    onPODClicked: (podTitle: String) -> Unit,
+    onSortClicked: () -> Unit
 ) {
-    Column(
-        modifier = Modifier.padding(16.dp)
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
 
-        Spacer(Modifier.height(32.dp))
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
 
-        Text(
-            "Our Universe",
-            color = Color.White,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            fontSize = 24.sp
-        )
+            Spacer(Modifier.height(32.dp))
 
-        Spacer(Modifier.height(32.dp))
+            Text(
+                "Our Universe",
+                color = Color.White,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontSize = 24.sp
+            )
 
-        LazyColumn {
-            items(pods) { pod ->
-                PODListContainer(
-                    pod.title,
-                    pod.getFormattedDate(),
-                    pod.imageUrl,
-                    onPODClicked
+            Spacer(Modifier.height(32.dp))
+
+            LazyColumn {
+                items(pods) { pod ->
+                    PODListContainer(
+                        pod.title,
+                        pod.getFormattedDate(),
+                        pod.imageUrl,
+                        onPODClicked
+                    )
+                }
+            }
+
+        }
+        FloatingActionButton(
+            onClick = { onSortClicked() },
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.BottomEnd),
+            containerColor = Color.Blue
+        ) {
+            Row {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_reorder),
+                    contentDescription = "Reorder Icon"
+                )
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Text(
+                    "Reorder list",
+                    color = Color.White,
                 )
             }
         }
-
     }
 }
 
@@ -166,24 +198,91 @@ fun PODListContainer(
 fun PlanetDetailsScreen(
     podTitle: String
 ) {
-    
+
     Text(text = podTitle, color = Color.White)
-    
+
 }
 
-@Preview
 @Composable
-fun APodContainerPreivew() {
-    ApodContainer()
+fun PODSortDialogScreen(
+    onSortTypeSelected: (type: FilterType) -> Unit
+) {
+
+    var sortType by remember { mutableStateOf(FilterType.TITLE) }
+
+    Column(
+        modifier = Modifier
+            .background(Color.DarkGray)
+            .padding(16.dp),
+
+        ) {
+        Text("Reorder list", color = Color.White, fontSize = 18.sp)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("Reorder by title", color = Color.White)
+
+            RadioButton(
+                selected = sortType == FilterType.TITLE,
+                onClick = { sortType = FilterType.TITLE })
+
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("Reorder by date", color = Color.White)
+
+            RadioButton(
+                selected = sortType == FilterType.DATE,
+                onClick = { sortType = FilterType.DATE })
+
+        }
+
+        Button(
+            onClick = { onSortTypeSelected(sortType) }, modifier = Modifier
+                .fillMaxWidth()
+                .height(45.dp)
+                .padding(start = 16.dp, end = 16.dp)
+        ) {
+
+            Text("Apply", color = Color.White)
+
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+        Text(text = "Reset", modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                sortType = FilterType.TITLE
+                onSortTypeSelected(sortType)
+            }, textAlign = TextAlign.Center
+        )
+
+
+    }
+
 }
 
 @Composable
 fun PlanetsApp() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination =  PODS) {
+    val podListViewModel: PODViewModel = koinViewModel()
+    NavHost(navController = navController, startDestination = PODS) {
         composable<PODS> {
             PODListScreen(
-                onPODClicked = { podTitle ->  navController.navigate(route = PODDetails(title = podTitle)) }
+                podListViewModel,
+                onPODClicked = { podTitle -> navController.navigate(route = PODDetails(title = podTitle)) },
+                onSortClicked = {
+                    navController.navigate(PODSortSettings)
+                }
             )
         }
         composable<PODDetails> { navBackStackEntry ->
@@ -192,14 +291,23 @@ fun PlanetsApp() {
                 podTitle = pod.title
             )
         }
+        dialog<PODSortSettings> {
+            PODSortDialogScreen(
+                onSortTypeSelected = { sortType ->
+                    podListViewModel.setFilterType(sortType)
+                })
+        }
     }
 }
 
 
-@kotlinx.serialization.Serializable
+@Serializable
 object PODS
 
-@kotlinx.serialization.Serializable
+@Serializable
 data class PODDetails(
     val title: String
 )
+
+@Serializable
+object PODSortSettings
