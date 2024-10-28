@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
@@ -54,10 +56,24 @@ import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 
 
+/**
+ * Due to a serialization issue I was unable to pass the entire object
+ * so I passed in individual pieces of information.
+ * Alternatively using either an in memory cache or DB and the title as a unique id (inplace of a UUID)
+ * then passing the title we could fetch the POD from our repository using a PODDetail VM
+ */
+
+/**
+ *   val title: String,
+ *     val date: String,
+ *     val hdImageUrl: String?,
+ *     val podExplanation: String,
+ *     val imageUrl: String
+ */
 @Composable
 fun PODListScreen(
     PODViewModel: PODViewModel,
-    onPODClicked: (podTitle: String) -> Unit,
+    onPODClicked: (podTitle: String,date: String,podExplanation: String,imageUrl: String, hdImageUrl: String?  ) -> Unit,
     onSortClicked: () -> Unit
 ) {
 
@@ -101,7 +117,7 @@ fun PODListScreen(
 @Composable
 fun PODListSuccessScreen(
     pods: List<PODImageModel>,
-    onPODClicked: (podTitle: String) -> Unit,
+    onPODClicked: (podTitle: String,date: String,podExplanation: String,imageUrl: String, hdImageUrl: String?  ) -> Unit,
     onSortClicked: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -128,6 +144,8 @@ fun PODListSuccessScreen(
                         pod.title,
                         pod.getFormattedDate(),
                         pod.imageUrl,
+                        pod.explanation,
+                        pod.imageUrlHQ,
                         onPODClicked
                     )
                 }
@@ -165,14 +183,16 @@ fun PODListContainer(
     title: String,
     date: String,
     url: String,
-    onPlanetClicked: (podTitle: String) -> Unit
+    explanation: String,
+    hdImageUrl: String?,
+    onPODClicked: (podTitle: String,date: String,podExplanation: String,imageUrl: String, hdImageUrl: String?  ) -> Unit,
 ) {
 
     Row(
         modifier = Modifier
             .height(100.dp)
             .fillMaxWidth()
-            .clickable { onPlanetClicked(title) },
+            .clickable { onPODClicked(title, date,explanation, url, hdImageUrl) },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         GlideImage(
@@ -194,12 +214,83 @@ fun PODListContainer(
 
 }
 
+//todo spacing for texts
+
+//todo loader for glide image
+
+//todo back functionality
+
+//todo back arrow should be white
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun PlanetDetailsScreen(
-    podTitle: String
+    podTitle: String,
+    podExplanation: String,
+    date: String,
+    hdImageUrl: String?,
+    imageUrl: String
 ) {
 
-    Text(text = podTitle, color = Color.White)
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        GlideImage(model = hdImageUrl ?: imageUrl, contentDescription = "Pod image", modifier = Modifier
+            .align(
+                Alignment.TopCenter
+            ).fillMaxWidth()
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "back arrow",
+                )
+
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Text(text = "Our universe", fontSize = 24.sp, color = Color.White)
+
+            }
+
+            Spacer(modifier = Modifier.height(48.dp))
+
+            Text(text = podTitle, fontSize = 32.sp, color = Color.White)
+
+            Spacer(modifier = Modifier.height(38.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+
+                Text(text = date, fontSize = 16.sp, color = Color.White)
+
+
+                //todo color should be white
+                Image(
+                    painter = painterResource(id = R.drawable.ic_favorite_border),
+                    contentDescription = "back arrow",
+                )
+
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+
+            Text(text = podExplanation, fontSize = 16.sp, color = Color.White)
+
+
+
+
+        }
+    }
 
 }
 
@@ -280,7 +371,7 @@ fun PlanetsApp() {
         composable<PODS> {
             PODListScreen(
                 podListViewModel,
-                onPODClicked = { podTitle -> navController.navigate(route = PODDetails(title = podTitle)) },
+                onPODClicked = { podTitle, date, podExplanation, imageUrl, hdImageUrl,  -> navController.navigate(route = PODDetails(title = podTitle, date= date, podExplanation = podExplanation, imageUrl = imageUrl, hdImageUrl = hdImageUrl)) },
                 onSortClicked = {
                     navController.navigate(PODSortSettings)
                 }
@@ -289,7 +380,11 @@ fun PlanetsApp() {
         composable<PODDetails> { navBackStackEntry ->
             val pod: PODDetails = navBackStackEntry.toRoute()
             PlanetDetailsScreen(
-                podTitle = pod.title
+                podTitle = pod.title,
+                date = pod.date,
+                hdImageUrl = pod.hdImageUrl,
+                imageUrl = pod.imageUrl,
+                podExplanation = pod.podExplanation,
             )
         }
         dialog<PODSortSettings> {
@@ -307,7 +402,11 @@ object PODS
 
 @Serializable
 data class PODDetails(
-    val title: String
+    val title: String,
+    val date: String,
+    val hdImageUrl: String?,
+    val podExplanation: String,
+    val imageUrl: String
 )
 
 @Serializable
