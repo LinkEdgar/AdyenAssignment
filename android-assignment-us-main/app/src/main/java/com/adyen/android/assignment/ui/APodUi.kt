@@ -160,7 +160,10 @@ fun PODListSuccessScreen(
                 .align(Alignment.BottomEnd),
             containerColor = Color.Blue
         ) {
-            Row {
+            Row(
+                modifier = Modifier
+                    .padding(8.dp)
+            ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_reorder),
                     contentDescription = "Reorder Icon"
@@ -316,7 +319,8 @@ fun PODSortDialogScreen(
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("Reorder by title", color = Color.White)
 
@@ -328,7 +332,8 @@ fun PODSortDialogScreen(
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("Reorder by date", color = Color.White)
 
