@@ -1,5 +1,6 @@
 package com.adyen.android.assignment.di
 
+import com.adyen.android.assignment.PODStorage
 import com.adyen.android.assignment.PODsRepository
 import com.adyen.android.assignment.api.PlanetaryService
 import com.adyen.android.assignment.viewmodels.PODViewModel
@@ -20,5 +21,11 @@ val networkModule = module {
 val dispatcherModule = module {
     single {
         Dispatchers.IO
+    }
+}
+
+val storageModule = module {
+    single {
+        PODStorage()
     }
 }

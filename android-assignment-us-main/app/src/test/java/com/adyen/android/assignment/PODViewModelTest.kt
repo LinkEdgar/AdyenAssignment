@@ -44,10 +44,10 @@ class PODViewModelTest {
     @Test
     fun `Given setSort type set to title we expect pods to be sorted`() = runTest {
         val pods = listOf(
-            PODImageModel("M", "", LocalDate.now(), "","",),
-            PODImageModel("Z", "", LocalDate.now(), "","",),
-            PODImageModel("D", "", LocalDate.now(), "","",),
-            PODImageModel("Y", "", LocalDate.now(), "","",)
+            PODImageModel("M", "", LocalDate.now(), "","",""),
+            PODImageModel("Z", "", LocalDate.now(), "","",""),
+            PODImageModel("D", "", LocalDate.now(), "","",""),
+            PODImageModel("Y", "", LocalDate.now(), "","","")
             )
 
         whenever(podRepo.getImagePlanets()).thenReturn(Resource.Success(pods))
@@ -66,10 +66,10 @@ class PODViewModelTest {
     @Test
     fun `Given setSort type set to date we expect pods to be sorted by date decending`() = runTest {
         val pods = listOf(
-            PODImageModel("third", "", LocalDate.parse("2021-01-07"), "","",),
-            PODImageModel("second", "", LocalDate.parse("2028-01-07"), "","",),
-            PODImageModel("first", "", LocalDate.parse("2084-01-07"), "","",),
-            PODImageModel("fourth", "", LocalDate.parse("1984-01-07"), "","",)
+            PODImageModel("third", "", LocalDate.parse("2021-01-07"), "","",""),
+            PODImageModel("second", "", LocalDate.parse("2028-01-07"), "","",""),
+            PODImageModel("first", "", LocalDate.parse("2084-01-07"), "","",""),
+            PODImageModel("fourth", "", LocalDate.parse("1984-01-07"), "","","")
         )
 
         whenever(podRepo.getImagePlanets()).thenReturn(Resource.Success(pods))

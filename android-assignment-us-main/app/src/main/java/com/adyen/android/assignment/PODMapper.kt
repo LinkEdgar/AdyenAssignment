@@ -3,6 +3,7 @@ package com.adyen.android.assignment
 import com.adyen.android.assignment.api.model.AstronomyPicture
 import com.adyen.android.assignment.ui.planets.PODImageModel
 import com.adyen.android.assignment.util.DateUtil
+import java.util.UUID
 
 object PODMapper {
 
@@ -16,7 +17,8 @@ object PODMapper {
             explanation = astronomyPicture.explanation ?: "",
             date = DateUtil.convertStringToDate(astronomyPicture.date ?: "") ?: return null, //since we want to order by date I decided not to models without it
             imageUrl = astronomyPicture.url ?: "",
-            imageUrlHQ = astronomyPicture.hdUrl
+            imageUrlHQ = astronomyPicture.hdUrl,
+            id = UUID.randomUUID().toString()
         )
     }
 

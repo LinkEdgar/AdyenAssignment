@@ -1,6 +1,7 @@
 package com.adyen.android.assignment.util
 
 import java.time.LocalDate
+import java.time.format.DateTimeParseException
 
 object DateUtil {
 
@@ -11,7 +12,7 @@ object DateUtil {
         try {
             val date = LocalDate.parse(stringDate)
             return date
-        } catch (e : Exception) {
+        } catch (e : DateTimeParseException) {
             //Logging this error would be something to help see if this conversion is failing
             return null
         }
