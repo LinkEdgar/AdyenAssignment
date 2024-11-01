@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -172,7 +173,7 @@ fun PODListSuccessScreen(
                 Spacer(modifier = Modifier.width(4.dp))
 
                 Text(
-                    "Reorder list",
+                    stringResource(R.string.reorder_list),
                     color = Color.White,
                 )
             }
@@ -259,7 +260,7 @@ fun PlanetDetailsScreen(
 
                 Spacer(modifier = Modifier.width(4.dp))
 
-                Text(text = "Our universe", fontSize = 24.sp, color = Color.White)
+                Text(text = stringResource(R.string.our_universe), fontSize = 24.sp, color = Color.White)
 
             }
 
@@ -322,7 +323,7 @@ fun PODSortDialogScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Reorder by title", color = Color.White)
+            Text(stringResource(R.string.reorder_by_title), color = Color.White)
 
             RadioButton(
                 selected = sortType == FilterType.TITLE,
@@ -335,7 +336,7 @@ fun PODSortDialogScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Reorder by date", color = Color.White)
+            Text(stringResource(R.string.reorder_by_date), color = Color.White)
 
             RadioButton(
                 selected = sortType == FilterType.DATE,
@@ -350,14 +351,14 @@ fun PODSortDialogScreen(
                 .padding(start = 16.dp, end = 16.dp)
         ) {
 
-            Text("Apply", color = Color.White)
+            Text(stringResource(R.string.apply), color = Color.White)
 
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
 
-        Text(text = "Reset", modifier = Modifier
+        Text(text = stringResource(R.string.reset), modifier = Modifier
             .fillMaxWidth()
             .clickable {
                 sortType = FilterType.TITLE

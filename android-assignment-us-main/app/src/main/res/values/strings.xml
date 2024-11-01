@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Android Assignment</string>
+    <string name="our_universe">Our universe</string>
+    <string name="reorder_by_title">Reorder by title</string>
+    <string name="reorder_by_date">Reorder by date</string>
+    <string name="reset">Reset</string>
+    <string name="apply">Apply</string>
+    <string name="reorder_list">Reorder list</string>
 </resources>
