@@ -29,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -192,7 +193,7 @@ fun PODListContainer(
         modifier = Modifier
             .height(100.dp)
             .fillMaxWidth()
-            .clickable { onPODClicked(title, date,explanation, url, hdImageUrl) },
+            .clickable { onPODClicked(title, date, explanation, url, hdImageUrl) },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         GlideImage(
@@ -236,7 +237,8 @@ fun PlanetDetailsScreen(
         GlideImage(model = hdImageUrl ?: imageUrl, contentDescription = "Pod image", modifier = Modifier
             .align(
                 Alignment.TopCenter
-            ).fillMaxWidth()
+            )
+            .fillMaxWidth()
         )
 
         Column(
@@ -300,7 +302,7 @@ fun PODSortDialogScreen(
     onSortTypeSelected: (type: FilterType) -> Unit
 ) {
 
-    var sortType by remember { mutableStateOf(FilterType.TITLE) }
+    var sortType by rememberSaveable { mutableStateOf(FilterType.TITLE) }
 
     Column(
         modifier = Modifier
