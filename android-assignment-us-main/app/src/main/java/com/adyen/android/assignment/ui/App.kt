@@ -4,6 +4,7 @@ import android.app.Application
 import com.adyen.android.assignment.di.dispatcherModule
 import com.adyen.android.assignment.di.networkModule
 import com.adyen.android.assignment.di.planetaryModules
+import com.adyen.android.assignment.di.storageModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -14,7 +15,7 @@ class App : Application() {
 
         startKoin {
             androidContext(this@App)
-            modules(planetaryModules, networkModule, dispatcherModule)
+            modules(planetaryModules, networkModule, dispatcherModule, storageModule)
         }
     }
 

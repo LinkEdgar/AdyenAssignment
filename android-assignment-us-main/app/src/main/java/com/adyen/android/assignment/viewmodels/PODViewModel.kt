@@ -16,12 +16,68 @@ import kotlinx.coroutines.launch
 open class PODViewModel(
     private val podsRepository: PODsRepository,
     private val dispatcher: CoroutineDispatcher
-): ViewModel() {
+) : ViewModel() {
 
     private var filterType: FilterType = FilterType.TITLE
     private val _uiState = MutableStateFlow<Resource<List<PODImageModel>>>(Resource.Uninitiated)
 
+    //POD in detail flow
+    private val _detailPod = MutableStateFlow<PODImageModel?>(null)
+
     val uiState = _uiState.asStateFlow()
+
+    val detailPodState = _detailPod.asStateFlow()
+
+    init {
+        viewModelScope.launch(dispatcher) {
+            podsRepository.getFavPods().collect { favPods ->
+                //update detail pod
+                val detailPod = _detailPod.value
+                if (favPods.contains(detailPod)) {
+                    _detailPod.value = _detailPod.value?.copy(isFavorite = true)
+                } else {
+                    _detailPod.value = _detailPod.value?.copy(isFavorite = false)
+                }
+
+                val state = _uiState.value
+                if (state is Resource.Success) {
+                    val favPodBuilder = mutableListOf<PODImageModel>()
+                    val pods = state.data
+                    pods.forEach { pod ->
+                        if (favPods.contains(pod)) {
+                            favPodBuilder.add(pod.copy(isFavorite = true))
+                        } else {
+                            favPodBuilder.add(pod)
+                        }
+                    }
+                    _uiState.value = Resource.Success(favPodBuilder)
+                }
+            }
+        }
+    }
+
+
+    fun addPODToFavorite(pod: PODImageModel) {
+        viewModelScope.launch(dispatcher) {
+            podsRepository.addPod(pod)
+        }
+    }
+
+    fun removePodFromFavorites(pod: PODImageModel) {
+        viewModelScope.launch(dispatcher) {
+            podsRepository.removePodFromFavorites(pod)
+        }
+    }
+
+    /**
+     * Returns POD given a successful getPODImages call
+     * otherwise returns false
+     * @param id --> UUID for POD
+     */
+    fun loadPod(id: String) {
+        val pod = (_uiState.value as? Resource.Success)?.data?.find { it.id == id }
+        _detailPod.value = pod
+    }
 
     fun loadPlanets() {
         if (_uiState.value !is Resource.Success) { //this will prevent us from reloading image after every configuraton state. Ideally we can use a datastore to update every 24 hours
@@ -47,7 +103,7 @@ open class PODViewModel(
         _uiState.value = Resource.Success(sortedPlanets)
     }
 
-    private fun getSortedPODS(planets: List<PODImageModel>) : List<PODImageModel> {
+    private fun getSortedPODS(planets: List<PODImageModel>): List<PODImageModel> {
         return when (filterType) {
             FilterType.TITLE -> {
                 planets.sortedBy { planet -> planet.title }

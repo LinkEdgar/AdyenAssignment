@@ -5,8 +5,28 @@ import com.adyen.android.assignment.ui.planets.PODImageModel
 import com.adyen.android.assignment.util.Resource
 
 open class PODsRepository(
-    private val planetaryService: PlanetaryService
+    private val planetaryService: PlanetaryService,
+    private val podStorage: PODStorage
 ) {
+
+
+    open fun getFavPods() = podStorage.favs
+
+    /**
+     * Removes pod from storage
+     * @param pod --> item to be added from storage
+     */
+    open suspend fun addPod(pod: PODImageModel) {
+        podStorage.addPodToFavs(pod)
+    }
+
+    /**
+     * Removes pod from storage
+     * @param pod --> item to be removed from storage
+     */
+    open suspend fun removePodFromFavorites(pod: PODImageModel) {
+        podStorage.removeFromFavs(pod)
+    }
 
     /**
      * One consideration to make is adding a cache time to refresh

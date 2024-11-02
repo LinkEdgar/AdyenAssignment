@@ -4,6 +4,7 @@ import com.adyen.android.assignment.ui.planets.PODImageModel
 import com.adyen.android.assignment.util.Resource
 import com.adyen.android.assignment.viewmodels.FilterType
 import com.adyen.android.assignment.viewmodels.PODViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -22,6 +23,7 @@ class PODViewModelTest {
 
     @Before
     fun setup() {
+        whenever(podRepo.getFavPods()).thenReturn(MutableSharedFlow())
         testSubject = PODViewModel(podRepo, UnconfinedTestDispatcher())
     }
 
@@ -44,10 +46,10 @@ class PODViewModelTest {
     @Test
     fun `Given setSort type set to title we expect pods to be sorted`() = runTest {
         val pods = listOf(
-            PODImageModel("M", "", LocalDate.now(), "","",""),
-            PODImageModel("Z", "", LocalDate.now(), "","",""),
-            PODImageModel("D", "", LocalDate.now(), "","",""),
-            PODImageModel("Y", "", LocalDate.now(), "","","")
+            PODImageModel("M", "", LocalDate.now(), "","","", isFavorite = false),
+            PODImageModel("Z", "", LocalDate.now(), "","","", isFavorite = false),
+            PODImageModel("D", "", LocalDate.now(), "","","", isFavorite = false),
+            PODImageModel("Y", "", LocalDate.now(), "","","", isFavorite = false)
             )
 
         whenever(podRepo.getImagePlanets()).thenReturn(Resource.Success(pods))
@@ -66,10 +68,10 @@ class PODViewModelTest {
     @Test
     fun `Given setSort type set to date we expect pods to be sorted by date decending`() = runTest {
         val pods = listOf(
-            PODImageModel("third", "", LocalDate.parse("2021-01-07"), "","",""),
-            PODImageModel("second", "", LocalDate.parse("2028-01-07"), "","",""),
-            PODImageModel("first", "", LocalDate.parse("2084-01-07"), "","",""),
-            PODImageModel("fourth", "", LocalDate.parse("1984-01-07"), "","","")
+            PODImageModel("third", "", LocalDate.parse("2021-01-07"), "","","", isFavorite = false),
+            PODImageModel("second", "", LocalDate.parse("2028-01-07"), "","","", isFavorite = false),
+            PODImageModel("first", "", LocalDate.parse("2084-01-07"), "","","", isFavorite = false),
+            PODImageModel("fourth", "", LocalDate.parse("1984-01-07"), "","","", isFavorite = false)
         )
 
         whenever(podRepo.getImagePlanets()).thenReturn(Resource.Success(pods))

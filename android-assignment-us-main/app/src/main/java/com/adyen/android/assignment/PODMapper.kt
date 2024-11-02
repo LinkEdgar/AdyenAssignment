@@ -10,7 +10,9 @@ object PODMapper {
     /**
      * Maps [AstronomyPicture] to [PODImageModel]
      */
-    fun mapImageAstronomyPictureToPlanetsModel(astronomyPicture: AstronomyPicture): PODImageModel? {
+    fun mapImageAstronomyPictureToPlanetsModel(
+        astronomyPicture: AstronomyPicture
+    ): PODImageModel? {
         if (astronomyPicture.mediaType != "image") return null // since we are only concerned about images at the moment
         return PODImageModel(
             title = astronomyPicture.title ?: return null, //since we want to order by title I decided not to models without it
@@ -18,7 +20,8 @@ object PODMapper {
             date = DateUtil.convertStringToDate(astronomyPicture.date ?: "") ?: return null, //since we want to order by date I decided not to models without it
             imageUrl = astronomyPicture.url ?: "",
             imageUrlHQ = astronomyPicture.hdUrl,
-            id = UUID.randomUUID().toString()
+            id = UUID.randomUUID().toString(),
+            isFavorite = false
         )
     }
 

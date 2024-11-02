@@ -15,7 +15,8 @@ data class PODImageModel(
     val date: LocalDate,
     val imageUrlHQ: String?,
     val imageUrl: String,
-    val id: String
+    val id: String,
+    val isFavorite: Boolean
 ) {
     fun getFormattedDate() : String {
         return formatLocalDateToString(date)

@@ -10,7 +10,7 @@ import org.koin.dsl.module
 
 
 val planetaryModules = module {
-    single { PODsRepository(get()) }
+    single { PODsRepository(get(),get()) }
     factory { PODViewModel(get(), get()) }
 }
 

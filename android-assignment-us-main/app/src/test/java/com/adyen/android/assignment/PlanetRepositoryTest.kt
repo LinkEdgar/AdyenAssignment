@@ -18,10 +18,14 @@ class PlanetRepositoryTest {
     @Mock
     private lateinit var planetaryService : PlanetaryService
 
+    @Mock
+    private lateinit var podStorage: PODStorage
+
     @Before
     fun setup() {
         planetaryService = mock()
-        planetsRepository = PODsRepository(planetaryService)
+        podStorage = mock()
+        planetsRepository = PODsRepository(planetaryService, podStorage)
     }
 
     @Test

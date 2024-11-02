@@ -75,7 +75,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun PODListScreen(
     PODViewModel: PODViewModel,
-    onPODClicked: (podTitle: String,date: String,podExplanation: String,imageUrl: String, hdImageUrl: String?  ) -> Unit,
+    onPODClicked: (id: String) -> Unit,
     onSortClicked: () -> Unit
 ) {
 
@@ -119,7 +119,7 @@ fun PODListScreen(
 @Composable
 fun PODListSuccessScreen(
     pods: List<PODImageModel>,
-    onPODClicked: (podTitle: String,date: String,podExplanation: String,imageUrl: String, hdImageUrl: String?  ) -> Unit,
+    onPODClicked: (id: String) -> Unit,
     onSortClicked: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -148,6 +148,7 @@ fun PODListSuccessScreen(
                         pod.imageUrl,
                         pod.explanation,
                         pod.imageUrlHQ,
+                        pod.id,
                         onPODClicked
                     )
                 }
@@ -190,14 +191,15 @@ fun PODListContainer(
     url: String,
     explanation: String,
     hdImageUrl: String?,
-    onPODClicked: (podTitle: String,date: String,podExplanation: String,imageUrl: String, hdImageUrl: String?  ) -> Unit,
+    id: String,
+    onPODClicked: (id: String)  -> Unit,
 ) {
 
     Row(
         modifier = Modifier
             .height(100.dp)
             .fillMaxWidth()
-            .clickable { onPODClicked(title, date, explanation, url, hdImageUrl) },
+            .clickable { onPODClicked(id) },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         GlideImage(
@@ -229,72 +231,94 @@ fun PODListContainer(
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun PlanetDetailsScreen(
-    podTitle: String,
-    podExplanation: String,
-    date: String,
-    hdImageUrl: String?,
-    imageUrl: String
+   id: String,
+   vm: PODViewModel
 ) {
+
+    val pod = vm.detailPodState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(id) {
+        vm.loadPod(id)
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        GlideImage(model = hdImageUrl ?: imageUrl, contentDescription = "Pod image", modifier = Modifier
-            .align(
-                Alignment.TopCenter
+        pod.value?.let { loadedPod ->
+
+            GlideImage(
+                model = loadedPod.imageUrlHQ ?: loadedPod?.imageUrl,
+                contentDescription = "Pod image",
+                modifier = Modifier
+                    .align(
+                        Alignment.TopCenter
+                    )
+                    .fillMaxWidth()
             )
-            .fillMaxWidth()
-        )
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
             ) {
-                Image(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "back arrow",
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "back arrow",
+                    )
 
-                Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
 
-                Text(text = stringResource(R.string.our_universe), fontSize = 24.sp, color = Color.White)
+                    Text(
+                        text = stringResource(R.string.our_universe),
+                        fontSize = 24.sp,
+                        color = Color.White
+                    )
+
+                }
+
+                Spacer(modifier = Modifier.height(48.dp))
+
+                Text(text = loadedPod.title, fontSize = 32.sp, color = Color.White)
+
+                Spacer(modifier = Modifier.height(38.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+
+                    Text(text = loadedPod.getFormattedDate(), fontSize = 16.sp, color = Color.White)
+
+
+                    //todo color should be white
+                    Image(
+                        painter = painterResource(id = if (loadedPod.isFavorite) { R.drawable.ic_favorite_filled } else { R.drawable.ic_favorite_border }),
+                        contentDescription = "back arrow",
+                        modifier = Modifier.clickable {
+                            if (loadedPod.isFavorite) {
+                                vm.removePodFromFavorites(loadedPod)
+                            } else {
+                                vm.addPODToFavorite(loadedPod)
+                            }
+                        }
+                    )
+
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+
+                Text(text = loadedPod.explanation, fontSize = 16.sp, color = Color.White)
+
 
             }
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            Text(text = podTitle, fontSize = 32.sp, color = Color.White)
-
-            Spacer(modifier = Modifier.height(38.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-
-                Text(text = date, fontSize = 16.sp, color = Color.White)
-
-
-                //todo color should be white
-                Image(
-                    painter = painterResource(id = R.drawable.ic_favorite_border),
-                    contentDescription = "back arrow",
-                )
-
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-
-            Text(text = podExplanation, fontSize = 16.sp, color = Color.White)
-
-
-
-
+        } ?: run {
+            CircularProgressIndicator(modifier = Modifier
+                .size(50.dp)
+                .align(Alignment.Center))
         }
     }
 
@@ -379,7 +403,7 @@ fun PlanetsApp() {
         composable<PODS> {
             PODListScreen(
                 podListViewModel,
-                onPODClicked = { podTitle, date, podExplanation, imageUrl, hdImageUrl,  -> navController.navigate(route = PODDetails(title = podTitle, date= date, podExplanation = podExplanation, imageUrl = imageUrl, hdImageUrl = hdImageUrl)) },
+                onPODClicked = { id  -> navController.navigate(route = PODDetails(id = id)) },
                 onSortClicked = {
                     navController.navigate(PODSortSettings)
                 }
@@ -388,11 +412,8 @@ fun PlanetsApp() {
         composable<PODDetails> { navBackStackEntry ->
             val pod: PODDetails = navBackStackEntry.toRoute()
             PlanetDetailsScreen(
-                podTitle = pod.title,
-                date = pod.date,
-                hdImageUrl = pod.hdImageUrl,
-                imageUrl = pod.imageUrl,
-                podExplanation = pod.podExplanation,
+                id = pod.id,
+                vm = podListViewModel
             )
         }
         dialog<PODSortSettings> {
@@ -410,11 +431,7 @@ object PODS
 
 @Serializable
 data class PODDetails(
-    val title: String,
-    val date: String,
-    val hdImageUrl: String?,
-    val podExplanation: String,
-    val imageUrl: String
+    val id: String
 )
 
 @Serializable
