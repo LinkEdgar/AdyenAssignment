@@ -3,6 +3,7 @@ package com.adyen.android.assignment
 import com.adyen.android.assignment.ui.planets.PODImageModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.onSubscription
 
 open class PODStorage {
 
@@ -10,7 +11,7 @@ open class PODStorage {
 
     private val _cachedPODS = MutableSharedFlow<List<PODImageModel>>()
 
-    open val favs = _cachedPODS.asSharedFlow()
+    open val favs = _cachedPODS.asSharedFlow().onSubscription { emit(emptyList()) }
 
     open suspend fun addPodToFavs(pod: PODImageModel) {
         if (!_favs.contains(pod)) {

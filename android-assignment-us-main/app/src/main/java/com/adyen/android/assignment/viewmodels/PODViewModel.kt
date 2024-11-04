@@ -7,7 +7,11 @@ import com.adyen.android.assignment.ui.planets.PODImageModel
 import com.adyen.android.assignment.util.Resource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -18,44 +22,55 @@ open class PODViewModel(
     private val dispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
-    private var filterType: FilterType = FilterType.TITLE
-    private val _uiState = MutableStateFlow<Resource<List<PODImageModel>>>(Resource.Uninitiated)
+    private var filterType: MutableStateFlow<FilterType> = MutableStateFlow(FilterType.TITLE)
 
     //POD in detail flow
     private val _detailPod = MutableStateFlow<PODImageModel?>(null)
 
-    val uiState = _uiState.asStateFlow()
+    private val _loadPods = MutableStateFlow<Resource<List<PODImageModel>>>(Resource.Uninitiated)
 
-    val detailPodState = _detailPod.asStateFlow()
+    val uiState: StateFlow<PODsUi> = combine(
+        filterType, _loadPods, podsRepository.getFavPods()
+    ) { type, podsState, favPods ->
 
-    init {
-        viewModelScope.launch(dispatcher) {
-            podsRepository.getFavPods().collect { favPods ->
-                //update detail pod
-                val detailPod = _detailPod.value
-                if (favPods.contains(detailPod)) {
-                    _detailPod.value = _detailPod.value?.copy(isFavorite = true)
-                } else {
-                    _detailPod.value = _detailPod.value?.copy(isFavorite = false)
-                }
+        _detailPod.value =
+            _detailPod.value?.copy(isFavorite = favPods.contains(_detailPod.value))
 
-                val state = _uiState.value
-                if (state is Resource.Success) {
-                    val favPodBuilder = mutableListOf<PODImageModel>()
-                    val pods = state.data
-                    pods.forEach { pod ->
-                        if (favPods.contains(pod)) {
-                            favPodBuilder.add(pod.copy(isFavorite = true))
-                        } else {
-                            favPodBuilder.add(pod)
-                        }
-                    }
-                    _uiState.value = Resource.Success(favPodBuilder)
-                }
+        when (podsState) {
+            is Resource.Success -> {
+                val sortedPods = getSortedPODS(
+                    podsState.data,
+                    type
+                ).map { pod -> pod.copy(isFavorite = favPods.contains(pod)) }
+                PODsUi(
+                    isLoading = false,
+                    pods = sortedPods,
+                    favoriteList = favPods
+                )
+            }
+
+            is Resource.Loading -> {
+                PODsUi(
+                    isLoading = true
+                )
+
+            }
+
+            is Resource.Error -> {
+                PODsUi(
+                    isLoading = false,
+                    errorMessage = podsState.error
+                )
+
+            }
+
+            else -> {
+                PODsUi()
             }
         }
-    }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, PODsUi())
 
+    val detailPodState = _detailPod.asStateFlow()
 
     fun addPODToFavorite(pod: PODImageModel) {
         viewModelScope.launch(dispatcher) {
@@ -75,36 +90,26 @@ open class PODViewModel(
      * @param id --> UUID for POD
      */
     fun loadPod(id: String) {
-        val pod = (_uiState.value as? Resource.Success)?.data?.find { it.id == id }
+        val pod = uiState.value.pods.find { it.id == id }
         _detailPod.value = pod
     }
 
     fun loadPlanets() {
-        if (_uiState.value !is Resource.Success) { //this will prevent us from reloading image after every configuraton state. Ideally we can use a datastore to update every 24 hours
-            _uiState.value = Resource.Loading
+        if (_loadPods.value !is Resource.Success) { //this will prevent us from reloading image after every configuraton state. Ideally we can use a datastore to update every 24 hours
+            _loadPods.value = Resource.Loading
             viewModelScope.launch(dispatcher) {
-
                 val response = podsRepository.getImagePlanets()
-                if (response is Resource.Success) {
-                    val planets = response.data
-                    val sortedPlanets = getSortedPODS(planets)
-                    _uiState.value = Resource.Success(sortedPlanets)
-                } else {
-                    _uiState.value = Resource.Error((response as Resource.Error).error)
-                }
+                _loadPods.value = response
             }
         }
     }
 
     fun setFilterType(filterType: FilterType) {
-        this.filterType = filterType
-        val planets = (_uiState.value as? Resource.Success)?.data ?: emptyList()
-        val sortedPlanets = getSortedPODS(planets)
-        _uiState.value = Resource.Success(sortedPlanets)
+        this.filterType.value = filterType
     }
 
-    private fun getSortedPODS(planets: List<PODImageModel>): List<PODImageModel> {
-        return when (filterType) {
+    private fun getSortedPODS(planets: List<PODImageModel>, type: FilterType): List<PODImageModel> {
+        return when (type) {
             FilterType.TITLE -> {
                 planets.sortedBy { planet -> planet.title }
             }
@@ -116,6 +121,13 @@ open class PODViewModel(
     }
 
 }
+
+data class PODsUi(
+    val isLoading: Boolean = true,
+    val pods: List<PODImageModel> = emptyList(),
+    val errorMessage: String? = null,
+    val favoriteList: List<PODImageModel> = emptyList()
+)
 
 /**
  *  there are other potential categories we could sort by

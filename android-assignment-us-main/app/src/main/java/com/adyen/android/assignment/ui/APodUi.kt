@@ -28,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -49,7 +48,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.adyen.android.assignment.R
 import com.adyen.android.assignment.ui.planets.PODImageModel
-import com.adyen.android.assignment.util.Resource
 import com.adyen.android.assignment.viewmodels.FilterType
 import com.adyen.android.assignment.viewmodels.PODViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -58,60 +56,34 @@ import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 
 
-/**
- * Due to a serialization issue I was unable to pass the entire object
- * so I passed in individual pieces of information.
- * Alternatively using either an in memory cache or DB and the title as a unique id (inplace of a UUID)
- * then passing the title we could fetch the POD from our repository using a PODDetail VM
- */
-
-/**
- *   val title: String,
- *     val date: String,
- *     val hdImageUrl: String?,
- *     val podExplanation: String,
- *     val imageUrl: String
- */
 @Composable
 fun PODListScreen(
-    PODViewModel: PODViewModel,
+    podViewModel: PODViewModel,
     onPODClicked: (id: String) -> Unit,
     onSortClicked: () -> Unit
 ) {
 
-    val uiState = PODViewModel.uiState.collectAsStateWithLifecycle()
+    val uiState = podViewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
-        PODViewModel.loadPlanets()
+        podViewModel.loadPlanets()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        when (uiState.value) {
-            is Resource.Error -> {
-                Text("error")
-            }
+        if (uiState.value.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(50.dp)
+            )
+        } else if (uiState.value.errorMessage != null) {
+            Text("Error --> ${uiState.value.errorMessage}")
 
-            Resource.Loading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(50.dp)
-                )
-            }
-
-            is Resource.Success -> {
-                val podList: List<PODImageModel> =
-                    (uiState.value as? Resource.Success<List<PODImageModel>>)?.data ?: emptyList()
-                PODListSuccessScreen(
-                    pods = podList,
-                    onPODClicked = onPODClicked,
-                    onSortClicked = { onSortClicked() })
-
-            }
-
-            Resource.Uninitiated -> {
-
-            }
+        } else {
+            PODListSuccessScreen(
+                pods = uiState.value.pods,
+                onPODClicked = onPODClicked,
+                onSortClicked = { onSortClicked() })
         }
     }
 }
@@ -146,8 +118,6 @@ fun PODListSuccessScreen(
                         pod.title,
                         pod.getFormattedDate(),
                         pod.imageUrl,
-                        pod.explanation,
-                        pod.imageUrlHQ,
                         pod.id,
                         onPODClicked
                     )
@@ -189,10 +159,8 @@ fun PODListContainer(
     title: String,
     date: String,
     url: String,
-    explanation: String,
-    hdImageUrl: String?,
     id: String,
-    onPODClicked: (id: String)  -> Unit,
+    onPODClicked: (id: String) -> Unit,
 ) {
 
     Row(
@@ -231,8 +199,8 @@ fun PODListContainer(
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun PlanetDetailsScreen(
-   id: String,
-   vm: PODViewModel
+    id: String,
+    vm: PODViewModel
 ) {
 
     val pod = vm.detailPodState.collectAsStateWithLifecycle()
@@ -246,7 +214,7 @@ fun PlanetDetailsScreen(
         pod.value?.let { loadedPod ->
 
             GlideImage(
-                model = loadedPod.imageUrlHQ ?: loadedPod?.imageUrl,
+                model = loadedPod.imageUrlHQ ?: loadedPod.imageUrl,
                 contentDescription = "Pod image",
                 modifier = Modifier
                     .align(
@@ -295,7 +263,13 @@ fun PlanetDetailsScreen(
 
                     //todo color should be white
                     Image(
-                        painter = painterResource(id = if (loadedPod.isFavorite) { R.drawable.ic_favorite_filled } else { R.drawable.ic_favorite_border }),
+                        painter = painterResource(
+                            id = if (loadedPod.isFavorite) {
+                                R.drawable.ic_favorite_filled
+                            } else {
+                                R.drawable.ic_favorite_border
+                            }
+                        ),
                         contentDescription = "back arrow",
                         modifier = Modifier.clickable {
                             if (loadedPod.isFavorite) {
@@ -316,9 +290,11 @@ fun PlanetDetailsScreen(
 
             }
         } ?: run {
-            CircularProgressIndicator(modifier = Modifier
-                .size(50.dp)
-                .align(Alignment.Center))
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(50.dp)
+                    .align(Alignment.Center)
+            )
         }
     }
 
@@ -382,12 +358,13 @@ fun PODSortDialogScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
 
-        Text(text = stringResource(R.string.reset), modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                sortType = FilterType.TITLE
-                onSortTypeSelected(sortType)
-            }, textAlign = TextAlign.Center
+        Text(
+            text = stringResource(R.string.reset), modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    sortType = FilterType.TITLE
+                    onSortTypeSelected(sortType)
+                }, textAlign = TextAlign.Center
         )
 
 
@@ -403,7 +380,7 @@ fun PlanetsApp() {
         composable<PODS> {
             PODListScreen(
                 podListViewModel,
-                onPODClicked = { id  -> navController.navigate(route = PODDetails(id = id)) },
+                onPODClicked = { id -> navController.navigate(route = PODDetails(id = id)) },
                 onSortClicked = {
                     navController.navigate(PODSortSettings)
                 }
