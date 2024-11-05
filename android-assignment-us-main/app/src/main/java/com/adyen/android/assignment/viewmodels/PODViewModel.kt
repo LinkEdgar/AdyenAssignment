@@ -91,7 +91,7 @@ open class PODViewModel(
         _detailPod.value = pod
     }
 
-    fun loadPlanets() {
+    fun loadPODS() {
         if (_loadPods.value !is Resource.Success) { //this will prevent us from reloading image after every configuraton state. Ideally we can use a datastore to update every 24 hours
             _loadPods.value = Resource.Loading
             viewModelScope.launch(dispatcher) {

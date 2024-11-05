@@ -66,7 +66,7 @@ fun PODListScreen(
 
     val uiState = podViewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
-        podViewModel.loadPlanets()
+        podViewModel.loadPODS()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {

@@ -20,7 +20,7 @@ class PODViewModelTest {
     @get:Rule
     val mainCoroutineRule = MainCoroutineRule()
 
-    private val storage =  FakePODStorage()
+    private val storage = FakePODStorage()
     private val podRepo: FakePodRepository = FakePodRepository(storage)
 
     private lateinit var testSubject: PODViewModel
@@ -32,54 +32,56 @@ class PODViewModelTest {
 
 
     @Test
-    fun `Given successful getImagePods is called successfully we expect uiState to not be loading and pods to be populated`() = runTest {
-        val successFulPods = listOf(PODImageModel("","",LocalDate.now(),"","","",false))
-        podRepo.setShouldNetworkSucceed(true)
-        podRepo.setPodsToReturn(successFulPods)
-        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            testSubject.uiState.collect()
+    fun `Given successful getImagePods is called successfully we expect uiState to not be loading and pods to be populated`() =
+        runTest {
+            val successFulPods = listOf(PODImageModel("", "", LocalDate.now(), "", "", "", false))
+            podRepo.setShouldNetworkSucceed(true)
+            podRepo.setPodsToReturn(successFulPods)
+            val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+                testSubject.uiState.collect()
+            }
+
+            val uiState = testSubject.uiState
+
+            assert(uiState.value.isLoading)
+            testSubject.loadPODS()
+            assert(!uiState.value.isLoading)
+            assert(uiState.value.pods == successFulPods)
+
+            job.cancel()
+
         }
-
-        val uiState = testSubject.uiState
-
-        assert(uiState.value.isLoading)
-        testSubject.loadPlanets()
-        assert(!uiState.value.isLoading)
-        assert(uiState.value.pods == successFulPods)
-
-        job.cancel()
-
-    }
 
     @Test
-    fun `Given error getImagePods is called successfully we expect uiState to be error`() = runTest {
-        podRepo.setShouldNetworkSucceed(false)
-        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            testSubject.uiState.collect()
-        }
+    fun `Given error getImagePods is called successfully we expect uiState to be error`() =
+        runTest {
+            podRepo.setShouldNetworkSucceed(false)
+            val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+                testSubject.uiState.collect()
+            }
 
-        testSubject.loadPlanets()
-        val uiState = testSubject.uiState
-        assert(!uiState.value.isLoading)
-        assert(uiState.value.errorMessage != null)
-        job.cancel()
-    }
+            testSubject.loadPODS()
+            val uiState = testSubject.uiState
+            assert(!uiState.value.isLoading)
+            assert(uiState.value.errorMessage != null)
+            job.cancel()
+        }
 
     @Test
     fun `Given setSort type set to title we expect pods to be sorted`() = runTest {
         val pods = listOf(
-            PODImageModel("M", "", LocalDate.now(), "","","", isFavorite = false),
-            PODImageModel("Z", "", LocalDate.now(), "","","", isFavorite = false),
-            PODImageModel("D", "", LocalDate.now(), "","","", isFavorite = false),
-            PODImageModel("Y", "", LocalDate.now(), "","","", isFavorite = false)
-            )
+            PODImageModel("M", "", LocalDate.now(), "", "", "", isFavorite = false),
+            PODImageModel("Z", "", LocalDate.now(), "", "", "", isFavorite = false),
+            PODImageModel("D", "", LocalDate.now(), "", "", "", isFavorite = false),
+            PODImageModel("Y", "", LocalDate.now(), "", "", "", isFavorite = false)
+        )
 
         podRepo.setShouldNetworkSucceed(true)
         podRepo.setPodsToReturn(pods)
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             testSubject.uiState.collect()
         }
-        testSubject.loadPlanets()
+        testSubject.loadPODS()
         testSubject.setFilterType(FilterType.TITLE)
         val uiState = testSubject.uiState
         val sortedPods = uiState.value.pods
@@ -95,10 +97,42 @@ class PODViewModelTest {
     @Test
     fun `Given setSort type set to date we expect pods to be sorted by date decending`() = runTest {
         val pods = listOf(
-            PODImageModel("third", "", LocalDate.parse("2021-01-07"), "","","", isFavorite = false),
-            PODImageModel("second", "", LocalDate.parse("2028-01-07"), "","","", isFavorite = false),
-            PODImageModel("first", "", LocalDate.parse("2084-01-07"), "","","", isFavorite = false),
-            PODImageModel("fourth", "", LocalDate.parse("1984-01-07"), "","","", isFavorite = false)
+            PODImageModel(
+                "third",
+                "",
+                LocalDate.parse("2021-01-07"),
+                "",
+                "",
+                "",
+                isFavorite = false
+            ),
+            PODImageModel(
+                "second",
+                "",
+                LocalDate.parse("2028-01-07"),
+                "",
+                "",
+                "",
+                isFavorite = false
+            ),
+            PODImageModel(
+                "first",
+                "",
+                LocalDate.parse("2084-01-07"),
+                "",
+                "",
+                "",
+                isFavorite = false
+            ),
+            PODImageModel(
+                "fourth",
+                "",
+                LocalDate.parse("1984-01-07"),
+                "",
+                "",
+                "",
+                isFavorite = false
+            )
         )
 
         podRepo.setShouldNetworkSucceed(true)
@@ -106,7 +140,7 @@ class PODViewModelTest {
         val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             testSubject.uiState.collect()
         }
-        testSubject.loadPlanets()
+        testSubject.loadPODS()
         testSubject.setFilterType(FilterType.DATE)
         val uiState = testSubject.uiState
         val sortedPods = uiState.value.pods
@@ -115,5 +149,121 @@ class PODViewModelTest {
         assert(sortedPods[2].title == "third")
         assert(sortedPods[3].title == "fourth")
         job.cancel()
+    }
+
+    @Test
+    fun `Adding pod to favorites change uiState`() = runTest {
+        val podToAdd = PODImageModel(
+            "third",
+            "",
+            LocalDate.parse("2021-01-07"),
+            "",
+            "",
+            "1",
+            isFavorite = false
+        )
+
+        val pods = listOf(
+            podToAdd,
+            PODImageModel(
+                "second",
+                "",
+                LocalDate.parse("2028-01-07"),
+                "",
+                "",
+                "2",
+                isFavorite = false
+            ),
+            PODImageModel(
+                "first",
+                "",
+                LocalDate.parse("2084-01-07"),
+                "",
+                "",
+                "3",
+                isFavorite = false
+            ),
+            PODImageModel(
+                "fourth",
+                "",
+                LocalDate.parse("1984-01-07"),
+                "",
+                "",
+                "4",
+                isFavorite = false
+            )
+        )
+        podRepo.setShouldNetworkSucceed(true)
+        podRepo.setPodsToReturn(pods)
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            testSubject.uiState.collect()
+        }
+        val uiState = testSubject.uiState
+        assert(uiState.value.favoriteList.isEmpty())
+        testSubject.loadPODS()
+
+        testSubject.addPODToFavorite(podToAdd)
+        assert(uiState.value.favoriteList.contains(podToAdd))
+        job.cancel()
+
+    }
+
+    @Test
+    fun `removing pod to favorites change uiState`() = runTest {
+        val podToAdd = PODImageModel(
+            "third",
+            "",
+            LocalDate.parse("2021-01-07"),
+            "",
+            "",
+            "1",
+            isFavorite = false
+        )
+
+        val pods = listOf(
+            podToAdd,
+            PODImageModel(
+                "second",
+                "",
+                LocalDate.parse("2028-01-07"),
+                "",
+                "",
+                "2",
+                isFavorite = false
+            ),
+            PODImageModel(
+                "first",
+                "",
+                LocalDate.parse("2084-01-07"),
+                "",
+                "",
+                "3",
+                isFavorite = false
+            ),
+            PODImageModel(
+                "fourth",
+                "",
+                LocalDate.parse("1984-01-07"),
+                "",
+                "",
+                "4",
+                isFavorite = false
+            )
+        )
+        podRepo.setShouldNetworkSucceed(true)
+        podRepo.setPodsToReturn(pods)
+        val job = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            testSubject.uiState.collect()
+        }
+        val uiState = testSubject.uiState
+        assert(uiState.value.favoriteList.isEmpty())
+        testSubject.loadPODS()
+
+        testSubject.addPODToFavorite(podToAdd)
+        assert(uiState.value.favoriteList.contains(podToAdd))
+        testSubject.removePodFromFavorites(podToAdd)
+        assert(!uiState.value.favoriteList.contains(podToAdd))
+        job.cancel()
+
     }
 }
