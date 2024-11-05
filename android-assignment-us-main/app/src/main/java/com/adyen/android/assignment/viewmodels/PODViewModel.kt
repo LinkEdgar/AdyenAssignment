@@ -14,9 +14,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/**
- * Using android viewmodel to help with configuration changes
- */
 open class PODViewModel(
     private val podsRepository: PODsRepository,
     private val dispatcher: CoroutineDispatcher
@@ -30,8 +27,8 @@ open class PODViewModel(
     private val _loadPods = MutableStateFlow<Resource<List<PODImageModel>>>(Resource.Uninitiated)
 
     val uiState: StateFlow<PODsUi> = combine(
-        filterType, _loadPods, podsRepository.getFavPods()
-    ) { type, podsState, favPods ->
+        filterType, _loadPods, podsRepository.getFavoritePodsStream(), podsRepository.getPodsStream()
+    ) { type, podsState, favPods , pods->
 
         _detailPod.value =
             _detailPod.value?.copy(isFavorite = favPods.contains(_detailPod.value))
@@ -39,7 +36,7 @@ open class PODViewModel(
         when (podsState) {
             is Resource.Success -> {
                 val sortedPods = getSortedPODS(
-                    podsState.data,
+                    pods,
                     type
                 ).map { pod -> pod.copy(isFavorite = favPods.contains(pod)) }
                 PODsUi(
@@ -90,7 +87,7 @@ open class PODViewModel(
      * @param id --> UUID for POD
      */
     fun loadPod(id: String) {
-        val pod = uiState.value.pods.find { it.id == id }
+        val pod = podsRepository.getPodByID(id)
         _detailPod.value = pod
     }
 

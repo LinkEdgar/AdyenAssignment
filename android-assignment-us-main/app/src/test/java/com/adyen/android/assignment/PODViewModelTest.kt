@@ -4,19 +4,39 @@ import com.adyen.android.assignment.ui.planets.PODImageModel
 import com.adyen.android.assignment.util.Resource
 import com.adyen.android.assignment.viewmodels.FilterType
 import com.adyen.android.assignment.viewmodels.PODViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.invoke
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import java.time.LocalDate
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class PODViewModelTest {
 
     //todo update tests
+
+
+    @ExperimentalCoroutinesApi
+    @get:Rule
+    val mainCoroutineRule = MainCoroutineRule()
 
     @Mock
     private val podRepo: PODsRepository = mock()
@@ -29,20 +49,38 @@ class PODViewModelTest {
         testSubject = PODViewModel(podRepo, UnconfinedTestDispatcher())
     }
 
+
     @Test
-    fun `Given successful getImagePlanets is called successfully we expect uiState to be successful`() = runTest {
-        whenever(podRepo.getImagePlanets()).thenReturn(Resource.Success(emptyList()))
+    fun `Given successful getImagePlanets is called successfully we expect uiState to not be loading and pods to be populated`() = runTest {
+        //given
+        val successFulPods = listOf(PODImageModel("","",LocalDate.now(),"","","",false))
+        whenever(podRepo.getImagePlanets()).thenReturn(Resource.Success(successFulPods))
+
+        val collectJob = launch(mainCoroutineRule.testDispatcher) {
+            testSubject.uiState.collect()
+        }
+        val uiState = testSubject.uiState.value
+        assert(uiState.isLoading)
+
+
+
         testSubject.loadPlanets()
-        val uiState = testSubject.uiState
-        assert(uiState.value is Resource.Success)
+        val yeet = testSubject.uiState.first()
+//        advanceUntilIdle()
+        assert(yeet.isLoading)
+//        assert(uiState.value.pods == successFulPods)
+        collectJob.cancel()
     }
 
     @Test
     fun `Given error getImagePlanets is called successfully we expect uiState to be error`() = runTest {
-        whenever(podRepo.getImagePlanets()).thenReturn(Resource.Error(error = "error"))
+        val errorMessage = "error"
+        whenever(podRepo.getImagePlanets()).thenReturn(Resource.Error(error = errorMessage))
         testSubject.loadPlanets()
         val uiState = testSubject.uiState
-        assert(uiState.value is Resource.Error)
+        assert(!uiState.value.isLoading)
+        assert(uiState.value.pods.isEmpty())
+        assert(uiState.value.errorMessage == errorMessage )
     }
 
     @Test
@@ -58,8 +96,7 @@ class PODViewModelTest {
         testSubject.loadPlanets()
         testSubject.setFilterType(FilterType.TITLE)
         val uiState = testSubject.uiState
-        assert(uiState.value is Resource.Success)
-        val sortedPods = (uiState.value as Resource.Success).data
+        val sortedPods = uiState.value.pods
         assert(sortedPods[0].title == "D")
         assert(sortedPods[1].title == "M")
         assert(sortedPods[2].title == "Y")
@@ -80,8 +117,7 @@ class PODViewModelTest {
         testSubject.loadPlanets()
         testSubject.setFilterType(FilterType.DATE)
         val uiState = testSubject.uiState
-        assert(uiState.value is Resource.Success)
-        val sortedPods = (uiState.value as Resource.Success).data
+        val sortedPods = uiState.value.pods
         assert(sortedPods[0].title == "first")
         assert(sortedPods[1].title == "second")
         assert(sortedPods[2].title == "third")

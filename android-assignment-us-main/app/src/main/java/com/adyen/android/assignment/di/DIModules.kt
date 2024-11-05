@@ -1,10 +1,9 @@
 package com.adyen.android.assignment.di
 
-import com.adyen.android.assignment.PODStorage
+import com.adyen.android.assignment.PODStorageImp
 import com.adyen.android.assignment.PODsRepository
 import com.adyen.android.assignment.api.PlanetaryService
 import com.adyen.android.assignment.viewmodels.PODViewModel
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import org.koin.dsl.module
 
@@ -26,6 +25,6 @@ val dispatcherModule = module {
 
 val storageModule = module {
     single {
-        PODStorage()
+        PODStorageImp()
     }
 }

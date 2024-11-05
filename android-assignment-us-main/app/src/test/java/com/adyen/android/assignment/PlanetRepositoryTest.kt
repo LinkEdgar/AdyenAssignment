@@ -19,7 +19,7 @@ class PlanetRepositoryTest {
     private lateinit var planetaryService : PlanetaryService
 
     @Mock
-    private lateinit var podStorage: PODStorage
+    private lateinit var podStorage: PODStorageImp
 
     @Before
     fun setup() {

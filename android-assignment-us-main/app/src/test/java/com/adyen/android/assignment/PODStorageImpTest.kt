@@ -5,9 +5,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import java.time.LocalDate
 
-class PODStorageTest {
+class PODStorageImpTest {
 
-    private val podStorage = PODStorage()
+    private val podStorage = PODStorageImp()
 
     @Test
     fun `Given a pod that is not in favs then addToFavs will add pod`() = runTest {
