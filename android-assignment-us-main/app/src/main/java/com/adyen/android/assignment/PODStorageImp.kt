@@ -31,18 +31,14 @@ open class PODStorageImp : PODStorage {
     open val pods = _cachedPods.asSharedFlow().onSubscription { emit(emptyList()) }
 
     override suspend fun addPodToFavorites(pod: PODImageModel) {
-        if (!_favs.contains(pod)) {
-            _favs.add(pod)
-            _podMap[pod.id] = pod.copy(isFavorite = true)
-        }
+        _favs.add(pod)
+        _podMap[pod.id] = pod.copy(isFavorite = true)
         _favoritePODS.emit(_favs)
     }
 
     override suspend fun removePodFromFavorites(pod: PODImageModel) {
-        if (_favs.contains(pod)) {
-            _favs.remove(pod)
-            _podMap[pod.id] = pod.copy(isFavorite = false)
-        }
+        _favs.remove(pod)
+        _podMap[pod.id] = pod.copy(isFavorite = false)
         _favoritePODS.emit(_favs)
     }
 

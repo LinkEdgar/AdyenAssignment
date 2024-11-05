@@ -30,15 +30,13 @@ open class PODViewModel(
         filterType, _loadPods, podsRepository.getFavPodStream(), podsRepository.getPODStream()
     ) { type, podsState, favPods , pods->
 
-        _detailPod.value =
-            _detailPod.value?.copy(isFavorite = favPods.contains(_detailPod.value))
-
         when (podsState) {
             is Resource.Success -> {
                 val sortedPods = getSortedPODS(
                     pods,
                     type
                 ).map { pod -> pod.copy(isFavorite = favPods.contains(pod)) }
+                _detailPod.value?.id?.let { loadPod(it) }
                 PODsUi(
                     isLoading = false,
                     pods = sortedPods,
@@ -105,14 +103,14 @@ open class PODViewModel(
         this.filterType.value = filterType
     }
 
-    private fun getSortedPODS(planets: List<PODImageModel>, type: FilterType): List<PODImageModel> {
+    private fun getSortedPODS(pod: List<PODImageModel>, type: FilterType): List<PODImageModel> {
         return when (type) {
             FilterType.TITLE -> {
-                planets.sortedBy { planet -> planet.title }
+                pod.sortedBy { pod -> pod.title }
             }
 
             FilterType.DATE -> {
-                planets.sortedByDescending { planet -> planet.date }
+                pod.sortedByDescending { pod -> pod.date }
             }
         }
     }
