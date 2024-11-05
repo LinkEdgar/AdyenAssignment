@@ -16,7 +16,7 @@ open class PODsRepository(
      * @param pod --> item to be added from storage
      */
     open suspend fun addPod(pod: PODImageModel) {
-        podStorage.addPodToFavs(pod)
+        podStorage.addPodToFavorites(pod)
     }
 
     /**
@@ -24,7 +24,7 @@ open class PODsRepository(
      * @param pod --> item to be removed from storage
      */
     open suspend fun removePodFromFavorites(pod: PODImageModel) {
-        podStorage.removeFromFavs(pod)
+        podStorage.removePodFromFavorites(pod)
     }
 
     /**

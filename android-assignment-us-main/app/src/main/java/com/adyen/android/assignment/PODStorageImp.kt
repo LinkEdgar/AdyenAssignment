@@ -12,44 +12,28 @@ interface PODStorage {
     suspend fun cachePods(pods: List<PODImageModel>)
     suspend fun deletePods()
     fun getCachedPodsStream(): Flow<List<PODImageModel>>
-    fun getFavoritePodsStream() : Flow<List<PODImageModel>>
+    fun getFavoritePodsStream(): Flow<List<PODImageModel>>
     fun getPodByID(id: String): PODImageModel?
 }
 
-open class PODStorageImp : PODStorage{
-
-    private val _favs = mutableListOf<PODImageModel>()
-
-    private val podCache = mutableListOf<PODImageModel>()
+open class PODStorageImp : PODStorage {
 
     private val _favoritePODS = MutableSharedFlow<List<PODImageModel>>()
 
-    private val _pods = MutableSharedFlow<List<PODImageModel>>()
+    private val _podMap = HashMap<String, PODImageModel>()
+    private val _favs = mutableListOf<PODImageModel>()
+
+    private val _cachedPods = MutableSharedFlow<List<PODImageModel>>()
 
 
     open val favs = _favoritePODS.asSharedFlow().onSubscription { emit(emptyList()) }
 
-    open val pods = _pods.asSharedFlow().onSubscription { emit(emptyList()) }
-
-
-
-    open suspend fun addPodToFavs(pod: PODImageModel) {
-        if (!_favs.contains(pod)) {
-            _favs.add(pod)
-        }
-        _favoritePODS.emit(_favs)
-    }
-
-    open suspend fun removeFromFavs(pod: PODImageModel) {
-        if (_favs.contains(pod)) {
-            _favs.remove(pod)
-        }
-        _favoritePODS.emit(_favs)
-    }
+    open val pods = _cachedPods.asSharedFlow().onSubscription { emit(emptyList()) }
 
     override suspend fun addPodToFavorites(pod: PODImageModel) {
         if (!_favs.contains(pod)) {
             _favs.add(pod)
+            _podMap[pod.id] = pod.copy(isFavorite = true)
         }
         _favoritePODS.emit(_favs)
     }
@@ -57,18 +41,21 @@ open class PODStorageImp : PODStorage{
     override suspend fun removePodFromFavorites(pod: PODImageModel) {
         if (_favs.contains(pod)) {
             _favs.remove(pod)
+            _podMap[pod.id] = pod.copy(isFavorite = false)
         }
         _favoritePODS.emit(_favs)
     }
 
     override suspend fun cachePods(pods: List<PODImageModel>) {
-        podCache.addAll(pods)
-        _pods.emit(podCache)
+        pods.forEach {
+            _podMap[it.id] = it
+        }
+        _cachedPods.emit(_podMap.values.toList())
     }
 
     override suspend fun deletePods() {
-        podCache.clear()
-        _pods.emit(podCache)
+        _podMap.clear()
+        _cachedPods.emit(_podMap.values.toList())
     }
 
     override fun getCachedPodsStream(): Flow<List<PODImageModel>> {
@@ -80,7 +67,7 @@ open class PODStorageImp : PODStorage{
     }
 
     override fun getPodByID(id: String): PODImageModel? {
-        return podCache.find { pod -> pod.id == id }
+        return _podMap[id]
     }
 
 
