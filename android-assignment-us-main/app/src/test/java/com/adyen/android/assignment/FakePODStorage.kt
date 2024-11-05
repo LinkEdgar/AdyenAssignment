@@ -2,38 +2,44 @@ package com.adyen.android.assignment
 
 import com.adyen.android.assignment.ui.planets.PODImageModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 class FakePODStorage : PODStorage  {
 
-    private val pods: MutableList<PODImageModel> = mutableListOf()
+    private val pods =  MutableStateFlow<List<PODImageModel>>(emptyList())
 
-    private val favPods: MutableList<PODImageModel> = mutableListOf()
+    private val favPods: MutableStateFlow<List<PODImageModel>> = MutableStateFlow(emptyList())
 
     override suspend fun addPodToFavorites(pod: PODImageModel) {
-        TODO("Not yet implemented")
+        val pods = favPods.value.toMutableList()
+        pods.add(pod)
+        favPods.value = pods
     }
 
     override suspend fun removePodFromFavorites(pod: PODImageModel) {
-        TODO("Not yet implemented")
+        val pods = favPods.value.toMutableList()
+        pods.remove(pod)
+        favPods.value = pods
     }
 
     override suspend fun cachePods(pods: List<PODImageModel>) {
-        TODO("Not yet implemented")
+        this.pods.value = pods
     }
 
     override suspend fun deletePods() {
-        TODO("Not yet implemented")
+        pods.value = emptyList()
     }
 
     override fun getCachedPodsStream(): Flow<List<PODImageModel>> {
-        TODO("Not yet implemented")
+        return pods.asSharedFlow()
     }
 
     override fun getFavoritePodsStream(): Flow<List<PODImageModel>> {
-        TODO("Not yet implemented")
+        return favPods.asSharedFlow()
     }
 
     override fun getPodByID(id: String): PODImageModel? {
-        TODO("Not yet implemented")
+        return pods.value.find { it.id == id }
     }
 }

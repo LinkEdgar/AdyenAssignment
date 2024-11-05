@@ -2,7 +2,7 @@ package com.adyen.android.assignment.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.adyen.android.assignment.PODsRepository
+import com.adyen.android.assignment.PODRepo
 import com.adyen.android.assignment.ui.planets.PODImageModel
 import com.adyen.android.assignment.util.Resource
 import kotlinx.coroutines.CoroutineDispatcher
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 open class PODViewModel(
-    private val podsRepository: PODsRepository,
+    private val podsRepository: PODRepo,
     private val dispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
@@ -27,7 +27,7 @@ open class PODViewModel(
     private val _loadPods = MutableStateFlow<Resource<List<PODImageModel>>>(Resource.Uninitiated)
 
     val uiState: StateFlow<PODsUi> = combine(
-        filterType, _loadPods, podsRepository.getFavoritePodsStream(), podsRepository.getPodsStream()
+        filterType, _loadPods, podsRepository.getFavPodStream(), podsRepository.getPODStream()
     ) { type, podsState, favPods , pods->
 
         _detailPod.value =
@@ -71,7 +71,7 @@ open class PODViewModel(
 
     fun addPODToFavorite(pod: PODImageModel) {
         viewModelScope.launch(dispatcher) {
-            podsRepository.addPod(pod)
+            podsRepository.addPodToFavorites(pod)
         }
     }
 
@@ -83,7 +83,7 @@ open class PODViewModel(
 
     /**
      * Returns POD given a successful getPODImages call
-     * otherwise returns false
+     * otherwise returns null
      * @param id --> UUID for POD
      */
     fun loadPod(id: String) {
@@ -95,7 +95,7 @@ open class PODViewModel(
         if (_loadPods.value !is Resource.Success) { //this will prevent us from reloading image after every configuraton state. Ideally we can use a datastore to update every 24 hours
             _loadPods.value = Resource.Loading
             viewModelScope.launch(dispatcher) {
-                val response = podsRepository.getImagePlanets()
+                val response = podsRepository.getImagePods()
                 _loadPods.value = response
             }
         }
@@ -126,9 +126,6 @@ data class PODsUi(
     val favoriteList: List<PODImageModel> = emptyList()
 )
 
-/**
- *  there are other potential categories we could sort by
- */
 
 enum class FilterType {
     TITLE,

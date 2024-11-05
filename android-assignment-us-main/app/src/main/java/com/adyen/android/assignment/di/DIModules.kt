@@ -1,5 +1,7 @@
 package com.adyen.android.assignment.di
 
+import com.adyen.android.assignment.PODRepo
+import com.adyen.android.assignment.PODStorage
 import com.adyen.android.assignment.PODStorageImp
 import com.adyen.android.assignment.PODsRepository
 import com.adyen.android.assignment.api.PlanetaryService
@@ -9,7 +11,7 @@ import org.koin.dsl.module
 
 
 val planetaryModules = module {
-    single { PODsRepository(get(),get()) }
+    single<PODRepo> { PODsRepository(get(),get()) }
     factory { PODViewModel(get(), get()) }
 }
 
@@ -24,7 +26,7 @@ val dispatcherModule = module {
 }
 
 val storageModule = module {
-    single {
+    single<PODStorage> {
         PODStorageImp()
     }
 }
