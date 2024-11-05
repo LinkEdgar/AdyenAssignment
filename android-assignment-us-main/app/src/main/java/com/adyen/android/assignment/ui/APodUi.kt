@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -200,7 +201,8 @@ fun PODListContainer(
 @Composable
 fun PlanetDetailsScreen(
     id: String,
-    vm: PODViewModel
+    vm: PODViewModel,
+    onBackClicked: () -> Unit
 ) {
 
     val pod = vm.detailPodState.collectAsStateWithLifecycle()
@@ -234,6 +236,8 @@ fun PlanetDetailsScreen(
                     Image(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "back arrow",
+                        colorFilter = ColorFilter.tint(Color.White),
+                        modifier = Modifier.size(32.dp).clickable { onBackClicked() }
                     )
 
                     Spacer(modifier = Modifier.width(4.dp))
@@ -390,7 +394,8 @@ fun PlanetsApp() {
             val pod: PODDetails = navBackStackEntry.toRoute()
             PlanetDetailsScreen(
                 id = pod.id,
-                vm = podListViewModel
+                vm = podListViewModel,
+                onBackClicked = { navController.popBackStack() }
             )
         }
         dialog<PODSortSettings> {

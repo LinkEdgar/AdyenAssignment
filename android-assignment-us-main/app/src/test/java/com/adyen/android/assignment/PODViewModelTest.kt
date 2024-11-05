@@ -16,6 +16,8 @@ import java.time.LocalDate
 
 class PODViewModelTest {
 
+    //todo update tests
+
     @Mock
     private val podRepo: PODsRepository = mock()
 
